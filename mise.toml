@@ -1,0 +1,24 @@
+[tools]
+dotnet = "10"
+dprint = "0.63.0"
+
+[tasks.build]
+description = "Build the CLI"
+run = "dotnet build SteamWorkshopUnsub.slnx"
+
+[tasks.format]
+description = "Format README files"
+run = "dprint fmt"
+
+[tasks.check]
+description = "Check README formatting"
+run = "dprint check"
+
+[tasks.workshop]
+description = "Run the CLI with an AppID and optional flags"
+alias = "w"
+run = "dotnet run --project src/SteamWorkshopUnsub.csproj --"
+
+[tasks.publish]
+description = "Publish a self-contained release with the native Steamworks library"
+run = "dotnet publish src/SteamWorkshopUnsub.csproj --configuration Release --property:PublishProfile=Bundled"
