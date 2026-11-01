@@ -110,15 +110,26 @@ internal static class Program
                     (localIdSet.Contains(item.Id) ? WorkshopItemSource.Acf : WorkshopItemSource.None);
             }
 
-            WorkshopConsole.ShowItemsTable(items);
+            if (listOnly)
+            {
+                WorkshopConsole.ShowItemsTable(items);
+                return SuccessExitCode;
+            }
 
-            if (listOnly || !WorkshopConsole.ConfirmRemoval(items.Count))
+            List<WorkshopItem> selectedItems = WorkshopConsole.SelectItemsForRemoval(items);
+            if (selectedItems.Count == 0)
+            {
+                WorkshopConsole.ShowNoItemsSelected();
+                return SuccessExitCode;
+            }
+
+            if (!WorkshopConsole.ConfirmRemoval(selectedItems.Count))
             {
                 return SuccessExitCode;
             }
 
             int removedCount = 0;
-            foreach (var item in items)
+            foreach (var item in selectedItems)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 bool unsubscribed = await WorkshopClient.UnsubscribeItemAsync(item.Id, cancellationToken);
@@ -134,8 +145,8 @@ internal static class Program
                 WorkshopStorage.RemoveItemFromConsumedVdf(appIdText, item.Id, userUgcPath);
             }
 
-            WorkshopConsole.ShowCompletion(removedCount, items.Count);
-            return removedCount == items.Count ? SuccessExitCode : PartialFailureExitCode;
+            WorkshopConsole.ShowCompletion(removedCount, selectedItems.Count);
+            return removedCount == selectedItems.Count ? SuccessExitCode : PartialFailureExitCode;
         }
         catch (OperationCanceledException)
         {

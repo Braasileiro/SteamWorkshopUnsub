@@ -11,7 +11,7 @@
 
   <PropertyGroup>
     <RootNamespace>SteamWorkshopUnsub</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <AssemblyTitle>SteamWorkshopUnsub</AssemblyTitle>
     <AssemblyDescription>CLI tool for listing and unsubscribing from Steam Workshop items.</AssemblyDescription>
     <Company>I love Mahou Shoujo Lyrical Nanoha</Company>

@@ -4,6 +4,8 @@ namespace SteamWorkshopUnsub.Workshop;
 
 internal static class WorkshopConsole
 {
+    private const int SelectionPageSize = 15;
+
     public static void ShowHeader(string name, string? version, string? copyright) =>
         AnsiConsole.MarkupLine($"\n[yellow]{Markup.Escape(name)}[/] {Markup.Escape(version ?? string.Empty)} by {Markup.Escape(copyright ?? string.Empty)}\n");
 
@@ -44,6 +46,33 @@ internal static class WorkshopConsole
         AnsiConsole.Write(table);
     }
 
+    public static List<WorkshopItem> SelectItemsForRemoval(IReadOnlyList<WorkshopItem> items)
+    {
+        var allItemsChoice = new WorkshopItem { Title = "All items" };
+        var prompt = new MultiSelectionPrompt<WorkshopItem>()
+            .Title("\nSelect the items to [red]unsubscribe and delete[/]:")
+            .NotRequired()
+            .PageSize(SelectionPageSize)
+            .MoreChoicesText("[grey](Move up and down to see more items)[/]")
+            .InstructionsText("[grey](Press [blue]<space>[/] to toggle, [green]<enter>[/] to continue)[/]")
+            .UseConverter(item => ReferenceEquals(item, allItemsChoice)
+                ? "[yellow]All items[/] [grey](press <space> to select or unselect all)[/]"
+                : FormatItemChoice(item))
+            .AddChoiceGroup(allItemsChoice, items);
+
+        // Preserve the current behavior while allowing individual items to be excluded.
+        prompt.Select(allItemsChoice);
+        foreach (var item in items)
+        {
+            prompt.Select(item);
+        }
+
+        return AnsiConsole.Prompt(prompt);
+    }
+
+    private static string FormatItemChoice(WorkshopItem item) =>
+        $"[grey]{item.Id}[/] - {Markup.Escape(item.Title ?? "Metadata unavailable")} - {FormatSource(item.Source)}";
+
     private static string FormatSource(WorkshopItemSource source) => source switch
     {
         WorkshopItemSource.Steam => "[blue]Steam[/]",
@@ -62,6 +91,9 @@ internal static class WorkshopConsole
 
     public static void ShowNoItems() =>
         AnsiConsole.MarkupLine("[yellow]No subscribed Workshop items were reported by Steam.[/]");
+
+    public static void ShowNoItemsSelected() =>
+        AnsiConsole.MarkupLine("[yellow]No items selected. Nothing was changed.[/]");
 
     public static void ShowCompletion(int removedCount, int totalCount)
     {

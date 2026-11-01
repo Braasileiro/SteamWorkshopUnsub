@@ -14,8 +14,10 @@ and local ACF entries, which helps find items that are not shown as regular Work
 
 Steam must be running with the correct account logged in.
 
-Without `--list`, the tool asks for confirmation before unsubscribing and deleting local item data.
-It is a good idea to run with `--list` first and check the selected items.
+Without `--list`, the tool lets you choose the items before asking for confirmation. All items are
+selected by default. Use the arrow keys to navigate, Space to select or deselect an item, and Enter
+to continue. Toggle the `All items` entry to select or deselect the entire list at once. It is a
+good idea to run with `--list` first and check the detected items.
 
 Steam may subscribe again to required items, such as official controller configurations. Restart
 Steam after making changes so its local configuration can be synchronized.
@@ -44,7 +46,8 @@ List all detected items without removing anything:
 SteamWorkshopUnsub APP_ID --list
 ```
 
-Run without `--list` to review the detected items and receive the removal confirmation:
+Run without `--list` to review the detected items, choose which ones to remove, and receive the
+removal confirmation:
 
 ```bash
 SteamWorkshopUnsub APP_ID
