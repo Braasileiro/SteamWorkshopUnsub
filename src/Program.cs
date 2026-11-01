@@ -116,7 +116,7 @@ internal static class Program
                 return SuccessExitCode;
             }
 
-            List<WorkshopItem> selectedItems = WorkshopConsole.SelectItemsForRemoval(items);
+            List<WorkshopItem> selectedItems = await WorkshopConsole.SelectItemsForRemovalAsync(items, cancellationToken);
             if (selectedItems.Count == 0)
             {
                 WorkshopConsole.ShowNoItemsSelected();

@@ -46,7 +46,9 @@ internal static class WorkshopConsole
         AnsiConsole.Write(table);
     }
 
-    public static List<WorkshopItem> SelectItemsForRemoval(IReadOnlyList<WorkshopItem> items)
+    public static async Task<List<WorkshopItem>> SelectItemsForRemovalAsync(
+        IReadOnlyList<WorkshopItem> items,
+        CancellationToken cancellationToken)
     {
         var allItemsChoice = new WorkshopItem { Title = "All items" };
         var prompt = new MultiSelectionPrompt<WorkshopItem>()
@@ -54,11 +56,14 @@ internal static class WorkshopConsole
             .NotRequired()
             .PageSize(SelectionPageSize)
             .MoreChoicesText("[grey](Move up and down to see more items)[/]")
-            .InstructionsText("[grey](Press [blue]<space>[/] to toggle, [green]<enter>[/] to continue)[/]")
+            .InstructionsText("[grey](Press [blue]<space>[/] to toggle, [green]<enter>[/] to continue, or [red]<esc>[/] to cancel)[/]")
             .UseConverter(item => ReferenceEquals(item, allItemsChoice)
                 ? "[yellow]All items[/] [grey](press <space> to select or unselect all)[/]"
                 : FormatItemChoice(item))
             .AddChoiceGroup(allItemsChoice, items);
+
+        // Throw after Spectre restores the prompt area so Escape follows the normal cancellation path.
+        prompt.CancelResult = () => throw new OperationCanceledException(cancellationToken);
 
         // Preserve the current behavior while allowing individual items to be excluded.
         prompt.Select(allItemsChoice);
@@ -67,7 +72,7 @@ internal static class WorkshopConsole
             prompt.Select(item);
         }
 
-        return AnsiConsole.Prompt(prompt);
+        return await AnsiConsole.PromptAsync(prompt, cancellationToken);
     }
 
     private static string FormatItemChoice(WorkshopItem item) =>
